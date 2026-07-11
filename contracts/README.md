@@ -1,32 +1,33 @@
-# Mocks para testing (Base Sepolia)
+# Test mocks (Base Sepolia)
 
-`Mocks.sol` tiene dos contratos para validar el patron approve + deposit
-(botones 2 y 5) sin dependencias externas:
+`Mocks.sol` provides two contracts to validate the approve + deposit pattern
+(buttons 2 and 5) with no external dependencies:
 
-- **MockUSDC** — ERC-20 con `mint` publico, 6 decimales (como USDC).
-- **MockVault** — vault estilo ERC-4626, `deposit(assets, receiver)` mintea shares 1:1.
+- **MockUSDC** — ERC-20 with a public `mint`, 6 decimals (like USDC).
+- **MockVault** — ERC-4626-style vault; `deposit(assets, receiver)` mints shares 1:1.
 
-## Despliegue rapido con Remix (sin instalar nada)
+## Quick deploy with Remix (no local toolchain)
 
-1. Abre https://remix.ethereum.org → crea un fichero `Mocks.sol` → pega el contenido.
-2. **Compile** (compilador 0.8.20+).
-3. Pestana **Deploy & Run** → Environment: **Injected Provider** (MetaMask en **Base Sepolia**;
-   necesitas algo de ETH de test: faucet de Base Sepolia).
-4. Despliega **MockUSDC** → copia su address.
-5. Despliega **MockVault** poniendo en el constructor (`_asset`) la address de MockUSDC →
-   copia su address.
-6. En MockUSDC, llama a **`mint(tuSmartWallet, 1000000000)`** para darte 1.000 mUSDC
-   (1.000 * 1e6) a tu **smart wallet** (la 0x6489... que ves en la app, NO el embedded).
-7. En `.env.local`:
+1. Open [remix.ethereum.org](https://remix.ethereum.org) → create a file `Mocks.sol` → paste the contents.
+2. **Compile** (compiler 0.8.20+).
+3. **Deploy & Run** tab → Environment: **Injected Provider** (MetaMask on **Base Sepolia**;
+   you need some test ETH from a Base Sepolia faucet).
+4. Deploy **MockUSDC** → copy its address.
+5. Deploy **MockVault** passing the MockUSDC address as the constructor arg (`_asset`) →
+   copy its address.
+6. On MockUSDC, call **`mint(yourSmartWallet, 1000000000)`** to give yourself 1,000 mUSDC
+   (1,000 * 1e6) on your **smart wallet** (the one shown in the app, NOT the embedded wallet).
+7. In `.env.local`:
    ```
-   NEXT_PUBLIC_TEST_TOKEN=<address de MockUSDC>
-   NEXT_PUBLIC_TEST_VAULT=<address de MockVault>
+   NEXT_PUBLIC_TEST_TOKEN=<MockUSDC address>
+   NEXT_PUBLIC_TEST_VAULT=<MockVault address>
    ```
-8. Reinicia `npm run dev`.
+8. Restart `npm run dev`.
 
-## Probar
-- **Boton 2** (front): tu ordenas el approve + deposit (con popup de confirmacion).
-- **Boton 5** (backend): el Sidecar hace el approve + deposit EN TU NOMBRE, sponsored,
-  sin popup. Mira en https://sepolia.basescan.org la tx con 2 internal calls.
+## Try it
 
-Tras depositar, el balance de mUSDC de tu smart wallet baja y el de shares del vault sube.
+- **Button 2** (client): you issue the approve + deposit (with a confirmation popup).
+- **Button 5** (backend): the Sidecar runs approve + deposit ON YOUR BEHALF, sponsored,
+  no popup. Look up the tx on [sepolia.basescan.org](https://sepolia.basescan.org) — it has 2 internal calls.
+
+After depositing, your smart wallet's mUSDC balance goes down and its vault shares go up.

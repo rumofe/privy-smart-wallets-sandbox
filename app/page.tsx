@@ -13,7 +13,7 @@ import {
 } from "@/lib/config";
 
 const SIGNER_ID = process.env.NEXT_PUBLIC_PRIVY_SIGNER_ID ?? "";
-// Opcional: si defines una policy en el dashboard, acota lo que el signer puede hacer.
+// Optional: if you define a policy in the dashboard, it scopes what the signer can do.
 const POLICY_ID = process.env.NEXT_PUBLIC_PRIVY_POLICY_ID ?? "";
 
 export default function Home() {
@@ -34,12 +34,12 @@ export default function Home() {
   ) as any;
   const walletId = embedded?.id as string | undefined;
 
-  // --- 1: tx patrocinada simple ---
+  // --- 1: simple sponsored transaction ---
   async function sendSponsored() {
     if (!client) return;
     setBusy(true);
     try {
-      append("Enviando tx patrocinada (value 0 a la zero address)...");
+      append("Sending sponsored tx (value 0 to the zero address)...");
       const txHash = await client.sendTransaction({ chain: CHAIN, to: zeroAddress, value: 0n });
       append(`OK · txHash: ${txHash}`);
       append(`https://sepolia.basescan.org/tx/${txHash}`);
@@ -50,17 +50,17 @@ export default function Home() {
     }
   }
 
-  // --- 2: batch approve + deposit desde el FRONT (usuario lo ordena) ---
+  // --- 2: batch approve + deposit from the CLIENT (user authorizes it) ---
   async function batchApproveDeposit() {
     if (!client || !smartWalletAddress) return;
     if (!TEST_TOKEN || !TEST_VAULT) {
-      append("Configura NEXT_PUBLIC_TEST_TOKEN y NEXT_PUBLIC_TEST_VAULT en .env.local");
+      append("Set NEXT_PUBLIC_TEST_TOKEN and NEXT_PUBLIC_TEST_VAULT in .env.local");
       return;
     }
     setBusy(true);
     try {
       const amount = parseUnits("1", 6);
-      append("Front: enviando batch approve + deposit en una sola UserOp...");
+      append("Client: sending batch approve + deposit in a single UserOp...");
       const txHash = await client.sendTransaction({
         calls: [
           {
@@ -82,27 +82,27 @@ export default function Home() {
     }
   }
 
-  // --- 3: anadir nuestra app como SESSION SIGNER (con policy opcional) ---
+  // --- 3: add our app as a SESSION SIGNER (with optional policy) ---
   async function addSigner() {
     if (!embeddedAddress) return;
     if (!SIGNER_ID) {
-      append("Falta NEXT_PUBLIC_PRIVY_SIGNER_ID en .env.local.");
+      append("Missing NEXT_PUBLIC_PRIVY_SIGNER_ID in .env.local.");
       return;
     }
     setBusy(true);
     try {
-      append(POLICY_ID ? "Anadiendo session signer (con policy)..." : "Anadiendo session signer...");
+      append(POLICY_ID ? "Adding session signer (with policy)..." : "Adding session signer...");
       await addSessionSigners({
         address: embeddedAddress,
         signers: [POLICY_ID ? { signerId: SIGNER_ID, policyIds: [POLICY_ID] } : { signerId: SIGNER_ID }],
       });
       setSignerAdded(true);
-      append("OK · session signer anadido. El backend ya puede operar tu wallet.");
+      append("OK · session signer added. The backend can now operate your wallet.");
     } catch (e) {
       const msg = (e as Error).message;
       if (/already|exists/i.test(msg)) {
         setSignerAdded(true);
-        append("El signer ya estaba anadido. Listo.");
+        append("Signer was already added. Ready.");
       } else {
         append(`ERROR: ${msg}`);
       }
@@ -111,20 +111,20 @@ export default function Home() {
     }
   }
 
-  // --- 4: el BACKEND firma un mensaje por ti (sin popup) ---
+  // --- 4: the BACKEND signs a message for you (no popup) ---
   async function backendSign() {
-    if (!walletId) return append("No tengo walletId.");
+    if (!walletId) return append("No walletId available.");
     setBusy(true);
     try {
-      append("Backend: firmando mensaje por ti (sin popup)...");
+      append("Backend: signing a message for you (no popup)...");
       const res = await fetch("/api/server-sign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ walletId }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "fallo backend");
-      append(`OK · firma del BACKEND: ${data.signature}`);
+      if (!res.ok) throw new Error(data.error ?? "backend failed");
+      append(`OK · BACKEND signature: ${data.signature}`);
     } catch (e) {
       append(`ERROR: ${(e as Error).message}`);
     } finally {
@@ -132,21 +132,21 @@ export default function Home() {
     }
   }
 
-  // --- 5: el BACKEND deposita en el vault por ti (el Sidecar de verdad) ---
+  // --- 5: the BACKEND deposits into the vault for you (the real "Sidecar") ---
   async function backendDeposit() {
-    if (!walletId || !smartWalletAddress) return append("Faltan walletId / smart wallet.");
+    if (!walletId || !smartWalletAddress) return append("Missing walletId / smart wallet.");
     setBusy(true);
     try {
-      append("Backend: approve + deposit en el vault EN TU NOMBRE (sponsored, sin popup)...");
+      append("Backend: approve + deposit into the vault ON YOUR BEHALF (sponsored, no popup)...");
       const res = await fetch("/api/server-send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ walletId, smartWalletAddress }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "fallo backend");
-      append(`OK · el BACKEND ejecuto el deposito: ${JSON.stringify(data.result)}`);
-      append("^ Esto es el Sidecar: opero tu smart wallet sin ti, gas $0, sin popup.");
+      if (!res.ok) throw new Error(data.error ?? "backend failed");
+      append(`OK · the BACKEND executed the deposit: ${JSON.stringify(data.result)}`);
+      append("^ This is the Sidecar: it operates your smart wallet without you, gas $0, no popup.");
     } catch (e) {
       append(`ERROR: ${(e as Error).message}`);
     } finally {
@@ -154,33 +154,33 @@ export default function Home() {
     }
   }
 
-  if (!ready) return <Shell>Cargando Privy...</Shell>;
+  if (!ready) return <Shell>Loading Privy...</Shell>;
 
   if (!authenticated) {
     return (
       <Shell>
-        <p>Sandbox de smart wallets · Base Sepolia</p>
-        <button onClick={login} style={btn}>Login con email</button>
+        <p>Smart wallets sandbox · Base Sepolia</p>
+        <button onClick={login} style={btn}>Log in with email</button>
       </Shell>
     );
   }
 
   return (
     <Shell>
-      <Row label="Embedded wallet (signer)" value={embeddedAddress ?? "creando..."} />
-      <Row label="Smart wallet (ERC-4337)" value={smartWalletAddress ?? "provisionando..."} />
-      <Row label="Session signer anadido" value={signerAdded ? "SI" : "NO"} />
+      <Row label="Embedded wallet (signer)" value={embeddedAddress ?? "creating..."} />
+      <Row label="Smart wallet (ERC-4337)" value={smartWalletAddress ?? "provisioning..."} />
+      <Row label="Session signer added" value={signerAdded ? "YES" : "NO"} />
 
       <div style={{ display: "flex", gap: 12, marginTop: 16, flexWrap: "wrap" }}>
-        <button onClick={sendSponsored} disabled={busy || !client} style={btn}>1 · Tx patrocinada</button>
-        <button onClick={batchApproveDeposit} disabled={busy || !client} style={btn}>2 · Batch (front)</button>
-        <button onClick={addSigner} disabled={busy || signerAdded} style={btn}>3 · Anadir session signer</button>
-        <button onClick={backendSign} disabled={busy || !walletId} style={btn}>4 · Backend firma</button>
-        <button onClick={backendDeposit} disabled={busy || !walletId || !smartWalletAddress} style={btn}>5 · Backend deposita (Sidecar)</button>
-        <button onClick={logout} style={{ ...btn, opacity: 0.6 }}>Logout</button>
+        <button onClick={sendSponsored} disabled={busy || !client} style={btn}>1 · Sponsored tx</button>
+        <button onClick={batchApproveDeposit} disabled={busy || !client} style={btn}>2 · Batch (client)</button>
+        <button onClick={addSigner} disabled={busy || signerAdded} style={btn}>3 · Add session signer</button>
+        <button onClick={backendSign} disabled={busy || !walletId} style={btn}>4 · Backend signs</button>
+        <button onClick={backendDeposit} disabled={busy || !walletId || !smartWalletAddress} style={btn}>5 · Backend deposits (Sidecar)</button>
+        <button onClick={logout} style={{ ...btn, opacity: 0.6 }}>Log out</button>
       </div>
 
-      <pre style={logBox}>{log.join("\n") || "Logs apareceran aqui..."}</pre>
+      <pre style={logBox}>{log.join("\n") || "Logs will appear here..."}</pre>
     </Shell>
   );
 }
@@ -188,7 +188,7 @@ export default function Home() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main style={{ maxWidth: 760, margin: "60px auto", padding: 24 }}>
-      <h1 style={{ fontSize: 20, marginBottom: 24 }}>WRAP · Privy Smart Wallets</h1>
+      <h1 style={{ fontSize: 20, marginBottom: 24 }}>Privy Smart Wallets Sandbox</h1>
       {children}
     </main>
   );

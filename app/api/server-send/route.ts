@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrivyClient } from "@privy-io/node";
 import { encodeFunctionData, parseUnits, type Address } from "viem";
 
-// El Sidecar de juguete: el BACKEND ejecuta una operacion onchain (approve +
-// deposit en el vault) EN NOMBRE del usuario, patrocinada y sin popup.
+// The "Sidecar": the BACKEND executes an on-chain operation (approve + deposit
+// into the vault) ON BEHALF of the user, sponsored and without a popup.
 const privy = new PrivyClient({
   appId: process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "",
   appSecret: process.env.PRIVY_APP_SECRET ?? "",
@@ -43,18 +43,18 @@ export async function POST(req: NextRequest) {
   try {
     const { walletId, smartWalletAddress } = await req.json();
     if (!walletId || !smartWalletAddress) {
-      return NextResponse.json({ error: "walletId y smartWalletAddress requeridos" }, { status: 400 });
+      return NextResponse.json({ error: "walletId and smartWalletAddress required" }, { status: 400 });
     }
     if (!TOKEN || !VAULT) {
       return NextResponse.json(
-        { error: "Faltan NEXT_PUBLIC_TEST_TOKEN / NEXT_PUBLIC_TEST_VAULT (despliega los mocks)" },
+        { error: "Missing NEXT_PUBLIC_TEST_TOKEN / NEXT_PUBLIC_TEST_VAULT (deploy the mocks)" },
         { status: 400 },
       );
     }
 
     const amount = parseUnits("1", 6); // 1 mUSDC
 
-    // Mismo batch que el boton 2, pero lo ordena el BACKEND, no el usuario.
+    // Same batch as button 2, but the BACKEND issues it, not the user.
     const calls = [
       {
         to: TOKEN,
@@ -74,8 +74,8 @@ export async function POST(req: NextRequest) {
       },
     ];
 
-    // sponsor: true -> Privy enruta por la smart wallet con paymaster (gas $0).
-    // authorization_context -> firma con la session signer key (sin el usuario).
+    // sponsor: true -> Privy routes through the smart wallet with a paymaster (gas $0).
+    // authorization_context -> signs with the session signer key (without the user).
     const result = await privy
       .wallets()
       .ethereum()

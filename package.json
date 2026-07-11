@@ -1,8 +1,8 @@
 {
-  "name": "wrap-privy-test",
+  "name": "privy-smart-wallets-sandbox",
   "version": "0.1.0",
   "private": true,
-  "description": "Sandbox para validar Privy smart wallets + Base Sepolia + patron Morpho (approve+deposit batch).",
+  "description": "Account abstraction (ERC-4337) sandbox: Privy smart wallets on Base Sepolia, sponsored txs, batched UserOps, session signers.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -1,17 +1,17 @@
 import { baseSepolia } from "viem/chains";
 import type { Address } from "viem";
 
-// Red de testing. Base Sepolia es gratis: el gas lo cubre el paymaster de Privy.
+// Testnet. Base Sepolia is free: gas is covered by Privy's paymaster.
 export const CHAIN = baseSepolia;
 
 export const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
 
-// Direcciones opcionales para el demo del patron Morpho (approve + deposit).
-// Si estan vacias, el boton de batch queda deshabilitado.
+// Optional addresses for the Morpho-pattern demo (approve + deposit).
+// If empty, the batch button is disabled.
 export const TEST_TOKEN = (process.env.NEXT_PUBLIC_TEST_TOKEN ?? "") as Address | "";
 export const TEST_VAULT = (process.env.NEXT_PUBLIC_TEST_VAULT ?? "") as Address | "";
 
-// ABIs minimas: solo las funciones que usamos.
+// Minimal ABIs: only the functions we use.
 export const ERC20_ABI = [
   {
     type: "function",
@@ -25,7 +25,7 @@ export const ERC20_ABI = [
   },
 ] as const;
 
-// ERC-4626 = el estandar de los vaults de Morpho (deposit/withdraw de un asset).
+// ERC-4626 = the standard for Morpho vaults (deposit/withdraw of an asset).
 export const ERC4626_ABI = [
   {
     type: "function",

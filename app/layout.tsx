@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "WRAP · Privy Smart Wallets test",
-  description: "Sandbox: smart wallets + Base Sepolia + patron Morpho",
+  title: "Privy Smart Wallets Sandbox",
+  description: "ERC-4337 smart wallets on Base Sepolia: sponsored txs, batched UserOps, session signers",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="en">
       <body
         style={{
           fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
