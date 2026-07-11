@@ -1,0 +1,29 @@
+{
+  "name": "wrap-privy-test",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sandbox para validar Privy smart wallets + Base Sepolia + patron Morpho (approve+deposit batch).",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@privy-io/node": "^0.21.0",
+    "@privy-io/react-auth": "^2.13.0",
+    "@privy-io/server-auth": "^1.32.5",
+    "next": "^14.2.5",
+    "ox": "^0.14.29",
+    "permissionless": "^0.2.57",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.5.3"
+  }
+}
